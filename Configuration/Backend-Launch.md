@@ -1,61 +1,44 @@
 # Backend Launch Instructions
 
-## Backend A
+The backends are deliberately tiny (Python standard library only, no dependencies): the network is the project.
 
-Backend A runs on port 3001.
+| | Backend A | Backend B |
+|---|---|---|
+| Machine | Mac 3 - **10.7.28.30** | Mac 4 - **10.7.10.160** |
+| Port | **3001** | **3002** |
+| Start | `cd Backend/backend-a && python3 app.py` | `cd Backend/backend-b && python3 app.py` |
+| Binds to | `0.0.0.0` (all LAN interfaces - **not** 127.0.0.1) | `0.0.0.0` |
+| Identifier header | `X-Backend: A` | `X-Backend: B` |
 
-Navigate to the Backend A project directory:
+Endpoints (both): `GET /` -> `{"backend": "A|B", "status": "running"}` and
+`GET /api/status` -> `{"backend": "A|B", "status": "ok"}`. Both send `Cache-Control: max-age=30`.
 
-cd backend-a
+> IP addresses are DHCP-assigned on the shared Wi-Fi and **changed between Phase 1 and Phase 2**
+> (Phase 1: 10.7.24.219 / 10.7.18.226 / 10.7.23.31 / 10.7.23.5). Check yours with `ipconfig getifaddr en0` and update
+> `dnsmasq.conf` and the `upstream` block of `nginx.conf` if they move again.
 
-Start the server:
+## Direct tests
 
-python3 app.py
+```bash
+# from the EDGE Mac (allowed by pf):
+curl -i http://10.7.28.30:3001/api/status        # X-Backend: A
+curl -i http://10.7.10.160:3002/api/status       # X-Backend: B
 
-Backend A address:
+# from any OTHER Mac (blocked by pf since Extension C) -> times out:
+curl --connect-timeout 5 -i http://10.7.28.30:3001/api/status
+```
 
-http://10.7.23.31:3001/
+## Through the edge (what clients must use)
 
-Status endpoint:
+```bash
+curl -i https://app.team1.test/api/status
+for i in {1..6}; do curl -s -i https://app.team1.test/api/status | grep -E 'HTTP/|X-Backend'; done
+```
 
-http://10.7.23.31:3001/api/status
+## Stop / start a backend (failover demo, Extension D)
 
-Test:
-
-curl http://10.7.23.31:3001/api/status
-
-
-## Backend B
-
-Backend B runs on port 3002.
-
-Navigate to the Backend B project directory:
-
-cd backend-b
-
-Start the server:
-
-python3 app.py
-
-Backend B address:
-
-http://10.7.23.5:3002/
-
-Status endpoint:
-
-http://10.7.23.5:3002/api/status
-
-Test:
-
-curl http://10.7.23.5:3002/api/status
-
-
-## Reverse Proxy
-
-Nginx listens on HTTPS port 443.
-
-Requests to:
-
-https://app.team1.test/
-
-are forwarded to Backend A or Backend B through the Nginx upstream configuration.
+```bash
+# Backend A: press Ctrl-C in its terminal   (or: pkill -f "backend-a/app.py")
+# Backend A again:
+cd Backend/backend-a && python3 app.py
+```

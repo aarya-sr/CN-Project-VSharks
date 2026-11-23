@@ -1,0 +1,14 @@
+# ---------------------------------------------------------------------------
+# Service isolation (Extension C) - Backend B - Mac 4 - 10.7.10.160
+# Loaded into the macOS anchor "com.apple/team1".
+#   load   : sudo pfctl -a 'com.apple/team1' -f ~/pf-team1-backend-b.rules
+#   enable : sudo pfctl -e
+#   show   : sudo pfctl -a 'com.apple/team1' -sr
+#   undo   : sudo pfctl -a 'com.apple/team1' -F rules
+# Note: the block rule also filters 127.0.0.1:3002 - the standby nginx running on
+# this same Mac must therefore use the LAN address 10.7.10.160:3002 as upstream.
+# ---------------------------------------------------------------------------
+edge_primary = "10.7.31.36"
+
+pass  in quick inet proto tcp from $edge_primary to any port = 3002 flags S/SA keep state
+block drop in proto tcp from any to any port = 3002

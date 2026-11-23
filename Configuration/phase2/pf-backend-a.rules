@@ -1,0 +1,13 @@
+# ---------------------------------------------------------------------------
+# Service isolation (Extension C) - Backend A - Mac 3 - 10.7.28.30
+# Loaded into the macOS anchor "com.apple/team1" (never edit /etc/pf.conf itself).
+#   load   : sudo pfctl -a 'com.apple/team1' -f ~/pf-team1-backend-a.rules
+#   enable : sudo pfctl -e
+#   show   : sudo pfctl -a 'com.apple/team1' -sr
+#   undo   : sudo pfctl -a 'com.apple/team1' -F rules      (see Phase2-Runbook.md)
+# ---------------------------------------------------------------------------
+edge_primary = "10.7.31.36"
+edge_standby = "10.7.10.160"      # needed once the standby edge takes over (Extension E)
+
+pass  in quick inet proto tcp from { $edge_primary, $edge_standby } to any port = 3001 flags S/SA keep state
+block drop in proto tcp from any to any port = 3001
