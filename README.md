@@ -38,8 +38,7 @@ flowchart LR
 ```
 
 Request path: **DNS** (`app.team1.test` -> edge IP) -> **TCP** handshake (443) -> **TLS** handshake -> **HTTPS** request ->
-nginx **round-robin** -> backend A or B -> response with `X-Backend: A|B`. Full diagrams: [`Architecture/Architecture_Doc.pdf`](Architecture/Architecture_Doc.pdf).
-
+nginx **round-robin** -> backend A or B -> response with `X-Backend: A|B`. 
 ## Repository layout
 
 ```
