@@ -34,6 +34,6 @@ class Handler(BaseHTTPRequestHandler):
 
 server = HTTPServer(("0.0.0.0", 3001), Handler)
 
-print("Backend A running on 10.7.23.31:3001")
+print("Backend A listening on 0.0.0.0:3001 (all LAN interfaces)")
 
 server.serve_forever()
